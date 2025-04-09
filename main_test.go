@@ -190,3 +190,38 @@ func TestDeleteProduct(t *testing.T) {
 	response = executeRequest(req)
 	checkResponseCode(t, http.StatusNotFound, response.Code)
 }
+
+func TestSearchProducts(t *testing.T) {
+	clearTable()
+	addProducts(3)
+
+	req, _ := http.NewRequest("GET", "/products/search?name=Product 1", nil)
+	response := executeRequest(req)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var products []product
+	json.Unmarshal(response.Body.Bytes(), &products)
+
+	if len(products) != 1 {
+		t.Errorf("Expected 1 product result, got %d", len(products))
+	}
+	if products[0].Name != "Product 1" {
+		t.Errorf("Expected product name to be 'Product 1'. Got '%s'", products[0].Name)
+	}
+}
+
+func TestCountProducts(t *testing.T) {
+	clearTable()
+	addProducts(5)
+
+	req, _ := http.NewRequest("GET", "/products/count", nil)
+	response := executeRequest(req)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var result map[string]int
+	json.Unmarshal(response.Body.Bytes(), &result)
+
+	if result["count"] != 5 {
+		t.Errorf("Expected count to be 5, got %d", result["count"])
+	}
+}
