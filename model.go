@@ -68,7 +68,9 @@ func getProducts(db *sql.DB, start, count int) ([]product, error) {
 }
 
 func searchProductsByName(db *sql.DB, name string) ([]product, error) {
-	rows, err := db.Query("SELECT id, name, price FROM products WHERE name ILIKE $1", "%"+name+"%")
+	rows, err :=
+		db.Query("SELECT id, name, price FROM products WHERE name ILIKE $1",
+			"%"+name+"%")
 	if err != nil {
 		return nil, err
 	}
