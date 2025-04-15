@@ -19,9 +19,22 @@ jobs:
       - name: Install dependencies
         run: go get .
         
-      # Start postgresql docker container
+      # Start PostgreSQL docker container
       - name: Start postgresql Container
-        run: docker run --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=${APP_DB_PASSWORD} -e POSTGRES_USER=${APP_DB_USERNAME} -e POSTGRES_DB=${APP_DB_NAME} -d postgres
+        run: docker run --name postgres -p 5432:5432 \
+              -e POSTGRES_PASSWORD=${APP_DB_PASSWORD} \
+              -e POSTGRES_USER=${APP_DB_USERNAME} \
+              -e POSTGRES_DB=${APP_DB_NAME} \
+              -d postgres
+
+      # Add a step to wait until Postgres is ready
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          echo "Waiting for PostgreSQL..."
+          until docker exec postgres pg_isready -U ${APP_DB_USERNAME}; do
+            sleep 2
+          done
+          echo "PostgreSQL is ready."
 
       - name: Build
         run: go build -v ./...
